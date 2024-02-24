@@ -1,9 +1,8 @@
 ﻿using ApiCatalogo.Context;
 using ApiCatalogo.Models;
 using ApiCatalogo.Repository.Interfaces;
-using Microsoft.AspNetCore.Http.HttpResults;
+using ApiCatalogo.Repository.Pagination;
 using Microsoft.EntityFrameworkCore;
-using System.Net.Http.Headers;
 
 namespace ApiCatalogo.Repository
 {
@@ -16,9 +15,14 @@ namespace ApiCatalogo.Repository
             _context = context;
         }
 
-        public async Task<IEnumerable<Categoria>> GetCategoriasAsync()
+        public async Task<IEnumerable<Categoria>> GetCategoriasAsync(CategoriasParametes categoriasParams)
         {
-            var categorias = await _context.Categorias.AsNoTracking().ToListAsync();
+            var categorias = await _context.Categorias
+                                            .OrderBy(c => c.Nome)
+                                            .Skip((categoriasParams.PageNumber - 1) * categoriasParams.PageSize)
+                                            .Take(categoriasParams.PageSize)
+                                            .AsNoTracking()
+                                            .ToListAsync();
 
             if (!categorias.Any())
                 throw new InvalidOperationException("Nenhuma categoria não encontrada!");
@@ -26,9 +30,15 @@ namespace ApiCatalogo.Repository
             return categorias;
         }
 
-        public async Task<IEnumerable<Categoria>> GetCategoriasProdutosAsync()
+        public async Task<IEnumerable<Categoria>> GetCategoriasProdutosAsync(CategoriasParametes categoriasParams)
         {
-            var categoriasProdutos = await _context.Categorias.Include(cp => cp.Produtos).AsNoTracking().ToListAsync();
+            var categoriasProdutos = await _context.Categorias
+                                                    .Include(cp => cp.Produtos)
+                                                    .OrderBy(cp => cp.Nome)
+                                                    .Skip((categoriasParams.PageNumber - 1) * categoriasParams.PageSize)
+                                                    .Take(categoriasParams.PageSize)
+                                                    .AsNoTracking()
+                                                    .ToListAsync();
 
             if (!categoriasProdutos.Any())
                 throw new InvalidOperationException("Nunhuma categoria e produto encontrado!");

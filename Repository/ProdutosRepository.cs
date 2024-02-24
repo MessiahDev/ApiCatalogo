@@ -1,6 +1,7 @@
 ﻿using ApiCatalogo.Context;
 using ApiCatalogo.Models;
 using ApiCatalogo.Repository.Interfaces;
+using ApiCatalogo.Repository.Pagination;
 using Microsoft.EntityFrameworkCore;
 
 namespace ApiCatalogo.Repository
@@ -14,9 +15,14 @@ namespace ApiCatalogo.Repository
             _context = context;
         }
 
-        public async Task<IEnumerable<Produto>> GetProdutosAsync()
+        public async Task<IEnumerable<Produto>> GetProdutosAsync(ProdutosParameters produtosParams)
         {
-            var produtos = await _context.Produtos.AsNoTracking().ToListAsync();
+            var produtos = await _context.Produtos
+                                        .OrderBy(p => p.Nome)
+                                        .Skip((produtosParams.PageNumber - 1) * produtosParams.PageSize)
+                                        .Take(produtosParams.PageSize)
+                                        .AsNoTracking()
+                                        .ToListAsync();
 
             if (produtos == null)
                 throw new InvalidOperationException("Nenhum produto encontrado!");

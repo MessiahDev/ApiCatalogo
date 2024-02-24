@@ -1,9 +1,7 @@
 ﻿using ApiCatalogo.Models;
 using ApiCatalogo.Repository.Interfaces;
-using Microsoft.AspNetCore.Http;
+using ApiCatalogo.Repository.Pagination;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Net.Http.Headers;
 
 namespace ApiCatalogo.Controllers
 {
@@ -19,11 +17,11 @@ namespace ApiCatalogo.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Categoria>>> GetCategorias()
+        public async Task<ActionResult<IEnumerable<Categoria>>> GetCategorias([FromQuery] CategoriasParametes categoriasParams)
         {
             try
             {
-                var categorias = await _unitOfWork.CategoriasRepository.GetCategoriasAsync();
+                var categorias = await _unitOfWork.CategoriasRepository.GetCategoriasAsync(categoriasParams);
 
                 return Ok(categorias);
             }
@@ -35,11 +33,11 @@ namespace ApiCatalogo.Controllers
         }
 
         [HttpGet("Produtos")]
-        public async Task<ActionResult<IEnumerable<Categoria>>> GetCategoriasProdutos()
+        public async Task<ActionResult<IEnumerable<Categoria>>> GetCategoriasProdutos([FromQuery] CategoriasParametes categoriasParams)
         {
             try
             {
-                var categoriasProdutos = await _unitOfWork.CategoriasRepository.GetCategoriasProdutosAsync();
+                var categoriasProdutos = await _unitOfWork.CategoriasRepository.GetCategoriasProdutosAsync(categoriasParams);
 
                 return Ok(categoriasProdutos);
             }
