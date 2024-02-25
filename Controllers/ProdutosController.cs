@@ -2,6 +2,7 @@
 using ApiCatalogo.Repository.Interfaces;
 using ApiCatalogo.Repository.Pagination;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace ApiCatalogo.Controllers
 {
@@ -23,11 +24,22 @@ namespace ApiCatalogo.Controllers
             {
                 var produtos = await _unitOfWork.ProdutosRepository.GetProdutosAsync(produtosParams);
 
+                var metadata = new
+                {
+                    produtos.TotalCount,
+                    produtos.PageSize,
+                    produtos.CurrentPage,
+                    produtos.TotalPages,
+                    produtos.HasNext,
+                    produtos.HasPrevius
+                };
+
+                Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));
+
                 return Ok(produtos);
             }
             catch (InvalidOperationException ex)
             {
-
                 return StatusCode(500, $"Ocorreu um erro ao obter produtos: {ex.Message}");
             }
         }
@@ -39,11 +51,22 @@ namespace ApiCatalogo.Controllers
             {
                 var produtos = await _unitOfWork.ProdutosRepository.GetProdutosByCategoriaAsync(id, produtosParams);
 
+                var metadata = new
+                {
+                    produtos.TotalCount,
+                    produtos.PageSize,
+                    produtos.CurrentPage,
+                    produtos.TotalPages,
+                    produtos.HasNext,
+                    produtos.HasPrevius
+                };
+
+                Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));
+
                 return Ok(produtos);
             }
             catch (InvalidOperationException ex)
             {
-
                 return StatusCode(500, $"Ocorreu um erro ao obter produtos: {ex.Message}");
             }
         }
@@ -59,7 +82,6 @@ namespace ApiCatalogo.Controllers
             }
             catch (InvalidOperationException ex)
             {
-
                 return StatusCode(500, $"Ocorreu um erro ao obter o produto: {ex.Message}");
             }
         }

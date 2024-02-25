@@ -2,6 +2,7 @@
 using ApiCatalogo.Repository.Interfaces;
 using ApiCatalogo.Repository.Pagination;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace ApiCatalogo.Controllers
 {
@@ -23,6 +24,18 @@ namespace ApiCatalogo.Controllers
             {
                 var categorias = await _unitOfWork.CategoriasRepository.GetCategoriasAsync(categoriasParams);
 
+                var metadata = new
+                {
+                    categorias.TotalCount,
+                    categorias.PageSize,
+                    categorias.CurrentPage,
+                    categorias.TotalPages,
+                    categorias.HasNext,
+                    categorias.HasPrevius
+                };
+
+                Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));
+
                 return Ok(categorias);
             }
             catch (InvalidOperationException ex)
@@ -38,6 +51,18 @@ namespace ApiCatalogo.Controllers
             try
             {
                 var categoriasProdutos = await _unitOfWork.CategoriasRepository.GetCategoriasProdutosAsync(categoriasParams);
+
+                var metadata = new
+                {
+                    categoriasProdutos.TotalCount,
+                    categoriasProdutos.PageSize,
+                    categoriasProdutos.CurrentPage,
+                    categoriasProdutos.TotalPages,
+                    categoriasProdutos.HasNext,
+                    categoriasProdutos.HasPrevius
+                };
+
+                Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));
 
                 return Ok(categoriasProdutos);
             }
