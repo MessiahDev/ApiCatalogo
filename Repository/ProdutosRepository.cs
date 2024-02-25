@@ -15,29 +15,31 @@ namespace ApiCatalogo.Repository
             _context = context;
         }
 
-        public async Task<IEnumerable<Produto>> GetProdutosAsync(ProdutosParameters produtosParams)
+        public async Task<PagedList<Produto>> GetProdutosAsync(ProdutosParameters produtosParams)
         {
-            var produtos = await _context.Produtos
-                                        .OrderBy(p => p.Nome)
-                                        .Skip((produtosParams.PageNumber - 1) * produtosParams.PageSize)
-                                        .Take(produtosParams.PageSize)
-                                        .AsNoTracking()
-                                        .ToListAsync();
+            var produtos = _context.Produtos
+                                    .OrderBy(p => p.ProdutoId)
+                                    .AsQueryable()
+                                    .AsNoTracking();
 
-            if (produtos == null)
-                throw new InvalidOperationException("Nenhum produto encontrado!");
+            var produtosOrdenados = await PagedList<Produto>
+                                            .ToPagedList(produtos, produtosParams.PageNumber, produtosParams.PageSize);
 
-            return produtos;
+            return produtosOrdenados;
         }
 
-        public async Task<IEnumerable<Produto>> GetProdutosByCategoriaAsync(int id)
+        public async Task<PagedList<Produto>> GetProdutosByCategoriaAsync(int id, ProdutosParameters produtosParams)
         {
-            var produtos = await _context.Produtos.Where(c => c.CategoriaId == id).AsNoTracking().ToListAsync();
+            var produtos = _context.Produtos
+                                    .Where(c => c.CategoriaId == id)
+                                    .OrderBy(c => c.CategoriaId)
+                                    .AsQueryable()
+                                    .AsNoTracking();
 
-            if (!produtos.Any())
-                throw new InvalidOperationException($"Não existe categoria com ID {id}!");
+            var produtosOrdenados = PagedList<Produto>
+                                    .ToPagedList(produtos, produtosParams.PageNumber, produtosParams.PageSize);
 
-            return produtos;
+            return await produtosOrdenados;
         }
 
         public async Task<Produto> GetProdutoByIdAsync(int id)

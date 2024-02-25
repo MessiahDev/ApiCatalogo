@@ -33,11 +33,11 @@ namespace ApiCatalogo.Controllers
         }
 
         [HttpGet("Categoria")]
-        public async Task<ActionResult<IEnumerable<Produto>>> GetProdutosByCategorias(int id)
+        public async Task<ActionResult<IEnumerable<Produto>>> GetProdutosByCategorias(int id, ProdutosParameters produtosParams)
         {
             try
             {
-                var produtos = await _unitOfWork.ProdutosRepository.GetProdutosByCategoriaAsync(id);
+                var produtos = await _unitOfWork.ProdutosRepository.GetProdutosByCategoriaAsync(id, produtosParams);
 
                 return Ok(produtos);
             }

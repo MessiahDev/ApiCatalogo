@@ -15,35 +15,31 @@ namespace ApiCatalogo.Repository
             _context = context;
         }
 
-        public async Task<IEnumerable<Categoria>> GetCategoriasAsync(CategoriasParametes categoriasParams)
+        public async Task<PagedList<Categoria>> GetCategoriasAsync(CategoriasParametes categoriasParams)
         {
-            var categorias = await _context.Categorias
-                                            .OrderBy(c => c.Nome)
-                                            .Skip((categoriasParams.PageNumber - 1) * categoriasParams.PageSize)
-                                            .Take(categoriasParams.PageSize)
-                                            .AsNoTracking()
-                                            .ToListAsync();
+            var categorias = _context.Categorias
+                                        .OrderBy(c => c.Nome)
+                                        .AsNoTracking()
+                                        .AsQueryable();
 
-            if (!categorias.Any())
-                throw new InvalidOperationException("Nenhuma categoria não encontrada!");
+            var categoriasOrdenadas = await PagedList<Categoria>
+                                                .ToPagedList(categorias, categoriasParams.PageNumber, categoriasParams.PageSize);
             
-            return categorias;
+            return categoriasOrdenadas;
         }
 
-        public async Task<IEnumerable<Categoria>> GetCategoriasProdutosAsync(CategoriasParametes categoriasParams)
+        public async Task<PagedList<Categoria>> GetCategoriasProdutosAsync(CategoriasParametes categoriasParams)
         {
-            var categoriasProdutos = await _context.Categorias
-                                                    .Include(cp => cp.Produtos)
-                                                    .OrderBy(cp => cp.Nome)
-                                                    .Skip((categoriasParams.PageNumber - 1) * categoriasParams.PageSize)
-                                                    .Take(categoriasParams.PageSize)
-                                                    .AsNoTracking()
-                                                    .ToListAsync();
+            var categoriasProdutos = _context.Categorias
+                                                .Include(cp => cp.Produtos)
+                                                .OrderBy(cp => cp.Nome)
+                                                .AsNoTracking()
+                                                .AsQueryable();
 
-            if (!categoriasProdutos.Any())
-                throw new InvalidOperationException("Nunhuma categoria e produto encontrado!");
+            var categoriasProdutosOrdenados = await PagedList<Categoria>
+                                                        .ToPagedList(categoriasProdutos, categoriasParams.PageNumber, categoriasParams.PageSize);
 
-            return categoriasProdutos;
+            return categoriasProdutosOrdenados;
         }
 
         public async Task<Categoria> GetCategoriaByIdAsync(int id)
